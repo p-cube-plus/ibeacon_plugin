@@ -1,0 +1,4 @@
+enum BeaconMonitoringState {
+  inside,
+  outside,
+}

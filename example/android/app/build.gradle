@@ -1,0 +1,47 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+android {
+    namespace = "com.pandora_cube.ibeacon_plugin_example"
+    compileSdk = flutter.compileSdkVersion
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        applicationId = "com.pandora_cube.ibeacon_plugin_example"
+        minSdk = flutter.minSdkVersion
+        targetSdk = flutter.targetSdkVersion
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+    }
+
+    buildTypes {
+        release {
+            signingConfig = signingConfigs.debug
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false
+            splits.abi.enable = false       
+            splits.density.enable = false   
+            aaptOptions.cruncherEnabled = false 
+            ext.alwaysUpdateBuildId = false 
+            ext.enableCrashlytics = false   
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}
