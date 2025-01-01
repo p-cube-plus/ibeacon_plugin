@@ -86,25 +86,25 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
                     uiThreadHandler.post {
                         eventSink?.success(true)
                     }
+                    Log.d(LOG_TAG, "비콘 INSIDE")
                 }
 
                 override fun didExitRegion(region: Region?) {
+                    val isEnabled = isBluetoothEnabled()
+                    if (!isEnabled) {
+                        Log.d(LOG_TAG, "비콘 모니터링 종료 ${region!!}")
+                        beaconManager?.stopMonitoring(region!!)
+                    }
+
                     uiThreadHandler.post {
                         eventSink?.success(false)
                     }
+                    Log.d(LOG_TAG, "비콘 OUTSIDE")
                 }
 
-                override fun didDetermineStateForRegion(state: Int, region: Region?) {
-                    if (state == MonitorNotifier.INSIDE) {
-                        Log.d(LOG_TAG, "비콘 INSIDE")
-                    } else if (state == MonitorNotifier.OUTSIDE) {
-                        Log.d(LOG_TAG, "비콘 OUTSIDE")
-                    }
-                }
+                override fun didDetermineStateForRegion(state: Int, region: Region?) {}
             })
             setEnableScheduledScanJobs(false)
-            setBackgroundScanPeriod(0L)
-            setBackgroundBetweenScanPeriod(0L)
         }
     }
 
