@@ -1,13 +1,13 @@
 import 'package:flutter/services.dart';
 
-sealed class IbeaconPluginException implements Exception {}
+sealed class IBeaconPluginException implements Exception {}
 
-class RegionNotSetException implements IbeaconPluginException {
+class RegionNotSetException implements IBeaconPluginException {
   @override
   String toString() => "Region이 설정되지 않았습니다.";
 }
 
-class BluetoothNotEnabledException implements IbeaconPluginException {
+class BluetoothNotEnabledException implements IBeaconPluginException {
   @override
   String toString() => "블루투스가 꺼져있습니다.";
 }

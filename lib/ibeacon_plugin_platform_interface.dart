@@ -4,15 +4,15 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'ibeacon_plugin_method_channel.dart';
 
-abstract class IbeaconPluginPlatform extends PlatformInterface {
-  IbeaconPluginPlatform() : super(token: _token);
+abstract class IBeaconPluginPlatform extends PlatformInterface {
+  IBeaconPluginPlatform() : super(token: _token);
 
   static final Object _token = Object();
 
-  static IbeaconPluginPlatform _instance = MethodChannelIbeaconPlugin();
-  static IbeaconPluginPlatform get instance => _instance;
+  static IBeaconPluginPlatform _instance = MethodChannelIBeaconPlugin();
+  static IBeaconPluginPlatform get instance => _instance;
 
-  static set instance(IbeaconPluginPlatform instance) {
+  static set instance(IBeaconPluginPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
   }

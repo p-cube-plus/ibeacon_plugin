@@ -20,6 +20,6 @@ flutter:
     platforms:
       android:
         package: com.pandora_cube.ibeacon_plugin
-        pluginClass: IbeaconPlugin
+        pluginClass: IBeaconPlugin
       ios:
-        pluginClass: IbeaconPlugin
+        pluginClass: IBeaconPlugin

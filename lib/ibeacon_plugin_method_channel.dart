@@ -6,7 +6,7 @@ import 'package:ibeacon_plugin/region.dart';
 
 import 'ibeacon_plugin_platform_interface.dart';
 
-class MethodChannelIbeaconPlugin extends IbeaconPluginPlatform {
+class MethodChannelIBeaconPlugin extends IBeaconPluginPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('ibeacon_plugin/methods');
   @visibleForTesting
@@ -53,12 +53,13 @@ class MethodChannelIbeaconPlugin extends IbeaconPluginPlatform {
 
   @override
   Future<bool> isBluetoothEnabled() async {
-    final isBluetoothEnabled = await methodChannel
-        .invokeMethod<bool>('isBluetoothEnabled')
-        .catchError((e) {
-      (e as PlatformException).throwCustomException();
-    });
-
-    return isBluetoothEnabled ?? false;
+    try {
+      final isBluetoothEnabled =
+          await methodChannel.invokeMethod<bool>('isBluetoothEnabled');
+      return isBluetoothEnabled ?? false;
+    } on PlatformException catch (e) {
+      e.throwCustomException();
+    }
+    return false;
   }
 }

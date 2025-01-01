@@ -1,21 +1,20 @@
-import 'package:ibeacon_plugin/beacon_monitoring_state.dart';
-import 'package:ibeacon_plugin/region.dart';
-
+import 'beacon_monitoring_state.dart';
 import 'ibeacon_plugin_platform_interface.dart';
+import 'region.dart';
 
-class IbeaconPlugin {
+class IBeaconPlugin {
   Future<void> setRegion(Region region) =>
-      IbeaconPluginPlatform.instance.setRegion(region);
+      IBeaconPluginPlatform.instance.setRegion(region);
 
   Future<void> startMonitoring() =>
-      IbeaconPluginPlatform.instance.startMonitoring();
+      IBeaconPluginPlatform.instance.startMonitoring();
 
   Future<void> stopMonitoring() =>
-      IbeaconPluginPlatform.instance.stopMonitoring();
+      IBeaconPluginPlatform.instance.stopMonitoring();
 
   Stream<BeaconMonitoringState> get monitoringStream =>
-      IbeaconPluginPlatform.instance.getMonitoringStream();
+      IBeaconPluginPlatform.instance.getMonitoringStream();
 
   Future<bool> get isBluetoothEnabled =>
-      IbeaconPluginPlatform.instance.isBluetoothEnabled();
+      IBeaconPluginPlatform.instance.isBluetoothEnabled();
 }

@@ -2,7 +2,7 @@ import UIKit
 import CoreLocation
 import Flutter
 
-public class IbeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate {
+public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate {
     private var channel: FlutterMethodChannel!
     private var eventChannel: FlutterEventChannel!
     private var eventSink: FlutterEventSink?
@@ -16,7 +16,7 @@ public class IbeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate {
     }
 
     public static func register(with registrar: FlutterPluginRegistrar) {
-        let instance = IbeaconPlugin()
+        let instance = IBeaconPlugin()
         instance.channel = FlutterMethodChannel(name: Constants.methodChannelName, binaryMessenger: registrar.messenger())
         instance.eventChannel = FlutterEventChannel(name: Constants.eventChannelName, binaryMessenger: registrar.messenger())
         

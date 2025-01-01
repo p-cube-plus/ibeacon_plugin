@@ -18,7 +18,7 @@ class _BeaconTestState extends State<BeaconTest> {
   String stopMonitoringText = "";
   String broadCastStreamText = "test";
   String isBluetoothEnabledText = "";
-  final ibeacon = IbeaconPlugin();
+  final ibeacon = IBeaconPlugin();
 
   late StreamSubscription<BeaconMonitoringState> becaonListener;
 
