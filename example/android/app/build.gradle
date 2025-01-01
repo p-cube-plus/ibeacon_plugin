@@ -7,7 +7,6 @@ plugins {
 android {
     namespace = "com.pandora_cube.ibeacon_plugin_example"
     compileSdkVersion 34
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -29,7 +28,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            signingConfig signingConfigs.debug
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             minifyEnabled true  // 코드 난독화 (proGuard) 적용을 위한 세팅.
             shrinkResources true    // 사용 안 하는 리소스 제거
