@@ -141,14 +141,15 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
                     return
                 }
 
-                if (region == null) {
-                    result.error(ErrorCodes.REGION_NOT_SET, "startMonitoring을 부르기 전에 ${SET_REGION_METHOD} 을 먼저 불러야 합니다.", null)
+                val isEnabled = isBluetoothEnabled()
+                if (!isEnabled) {
+                    result.error(ErrorCodes.BLUETOOTH_NOT_ENABLED, "블루투스가 꺼져있습니다.", null)
                     return
                 }
 
-                val isEnabled = isBluetoothEnabled()
-                if (!isEnabled) {
-                    Log.d(LOG_TAG, "블루투스가 꺼져있습니다.")
+                if (region == null) {
+                    result.error(ErrorCodes.REGION_NOT_SET, "startMonitoring을 부르기 전에 ${SET_REGION_METHOD} 을 먼저 불러야 합니다.", null)
+                    return
                 }
 
                 Log.d(LOG_TAG, "비콘 모니터링 시작 ${region!!}")
