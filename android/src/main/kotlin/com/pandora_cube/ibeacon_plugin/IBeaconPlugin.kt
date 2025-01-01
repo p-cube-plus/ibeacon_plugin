@@ -1,11 +1,12 @@
 package com.pandora_cube.ibeacon_plugin
 
 import android.bluetooth.BluetoothAdapter
-import android.util.Log;
-import android.app.Activity;
-import android.content.Context;
-import android.content.ServiceConnection;
-import android.content.Intent;
+import android.bluetooth.BluetoothManager
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.util.Log
 import android.os.Handler
 import android.os.Looper
 
@@ -14,20 +15,19 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.plugin.common.MethodChannel.Result
 
-import org.altbeacon.beacon.BeaconConsumer;
-import org.altbeacon.beacon.BeaconManager;
-import org.altbeacon.beacon.BeaconParser;
-import org.altbeacon.beacon.MonitorNotifier;
-import org.altbeacon.beacon.Region;
-import org.altbeacon.beacon.Identifier;
+import org.altbeacon.beacon.BeaconManager
+import org.altbeacon.beacon.BeaconParser
+import org.altbeacon.beacon.MonitorNotifier
+import org.altbeacon.beacon.Region
+import org.altbeacon.beacon.Identifier
 
 // https://altbeacon.github.io/android-beacon-library/autobind.html
-class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
+class IBeaconPlugin : FlutterPlugin, MethodCallHandler {
 
     private lateinit var methodChannel: MethodChannel
     private lateinit var eventChannel: EventChannel
+    private lateinit var bluetoothManager: BluetoothManager
     private var eventSink: EventChannel.EventSink? = null
 
     private val uiThreadHandler = Handler(Looper.getMainLooper())
@@ -36,7 +36,7 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
     private var region: Region? = null
 
     companion object {
-        const val IBEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"
+        const val I_BEACON_LAYOUT = "m:2-3=0215,i:4-19,i:20-21,i:22-23,p:24-24,d:25-25"
         const val METHOD_CHANNEL_NAME = "ibeacon_plugin/methods"
         const val EVENT_CHANNEL_NAME = "ibeacon_plugin/events"
 
@@ -58,8 +58,7 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
     }
 
     private fun isBluetoothEnabled(): Boolean {
-        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
-        return bluetoothAdapter?.isEnabled == true
+        return bluetoothManager.adapter.isEnabled
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -79,8 +78,13 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
             }
         })
 
+        val filter = IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED)
+        binding.applicationContext.registerReceiver(bluetoothStateReceiver, filter)
+
+        bluetoothManager = binding.applicationContext.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+
         beaconManager = BeaconManager.getInstanceForApplication(binding.applicationContext).apply {
-            beaconParsers.add(BeaconParser().setBeaconLayout(IBEACON_LAYOUT))
+            beaconParsers.add(BeaconParser().setBeaconLayout(I_BEACON_LAYOUT))
             addMonitorNotifier(object : MonitorNotifier {
                 override fun didEnterRegion(region: Region?) {
                     uiThreadHandler.post {
@@ -92,8 +96,10 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
                 override fun didExitRegion(region: Region?) {
                     val isEnabled = isBluetoothEnabled()
                     if (!isEnabled) {
-                        Log.d(LOG_TAG, "비콘 모니터링 종료 ${region!!}")
-                        beaconManager?.stopMonitoring(region!!)
+                        this@IBeaconPlugin.region?.let {
+                            Log.d(LOG_TAG, "비콘 모니터링 종료 $it")
+                            beaconManager?.stopMonitoring(it)
+                        }
                     }
 
                     uiThreadHandler.post {
@@ -115,6 +121,7 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
             removeAllMonitorNotifiers()
         }
         beaconManager = null
+        binding.applicationContext.unregisterReceiver(bluetoothStateReceiver)
         eventSink = null
     }
 
@@ -132,7 +139,7 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
                     major?.let { Identifier.fromInt(it) },
                     minor?.let { Identifier.fromInt(it) })
                 result.success(null)
-                Log.d(LOG_TAG, "region 설정 완료 ${region}")
+                Log.d(LOG_TAG, "region 설정 완료 $region")
             }
 
             START_MONITORING_METHOD -> {
@@ -152,7 +159,7 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
                     return
                 }
 
-                Log.d(LOG_TAG, "비콘 모니터링 시작 ${region!!}")
+                Log.d(LOG_TAG, "비콘 모니터링 시작 $region")
                 beaconManager?.startMonitoring(region!!)
                 result.success(null)
             }
@@ -164,15 +171,11 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
                 }
 
                 if (region == null) {
-                    result.error(ErrorCodes.REGION_NOT_SET, "stopMonitoring을 부르기 전에 ${SET_REGION_METHOD} 을 먼저 불러야 합니다.", null)
+                    result.error(ErrorCodes.REGION_NOT_SET, "stopMonitoring을 부르기 전에 $SET_REGION_METHOD 을 먼저 불러야 합니다.", null)
                     return
                 }
 
-                Log.d(LOG_TAG, "비콘 모니터링 종료 ${region!!}")
-                beaconManager?.stopMonitoring(region!!)
-                uiThreadHandler.post {
-                    eventSink?.success(false)
-                }
+                stopBeaconMonitoring()
                 result.success(null)
             }
 
@@ -183,6 +186,34 @@ class IbeaconPlugin : FlutterPlugin, MethodCallHandler {
             }
 
             else -> result.notImplemented()
+        }
+    }
+
+    private fun stopBeaconMonitoring() {
+        region?.let {
+            Log.d(LOG_TAG, "비콘 모니터링 종료 $it")
+            beaconManager?.stopMonitoring(it)
+        }
+
+        uiThreadHandler.post {
+            eventSink?.success(false)
+        }
+    }
+
+    private val bluetoothStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == BluetoothAdapter.ACTION_STATE_CHANGED) {
+                val state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR)
+                when (state) {
+                    BluetoothAdapter.STATE_OFF -> {
+                        Log.d(LOG_TAG, "블루투스가 비활성화되었습니다.")
+                        stopBeaconMonitoring()
+                    }
+                    BluetoothAdapter.STATE_ON -> {
+                        Log.d(LOG_TAG, "블루투스가 활성화되었습니다.")
+                    }
+                }
+            }
         }
     }
 }
