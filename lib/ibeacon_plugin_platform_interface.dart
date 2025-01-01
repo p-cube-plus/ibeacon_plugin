@@ -24,4 +24,6 @@ abstract class IbeaconPluginPlatform extends PlatformInterface {
   Future<void> stopMonitoring();
 
   Stream<BeaconMonitoringState> getMonitoringStream();
+
+  Future<bool> isBluetoothEnabled();
 }

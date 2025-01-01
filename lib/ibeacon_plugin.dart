@@ -15,4 +15,7 @@ class IbeaconPlugin {
 
   Stream<BeaconMonitoringState> get monitoringStream =>
       IbeaconPluginPlatform.instance.getMonitoringStream();
+
+  Future<bool> get isBluetoothEnabled =>
+      IbeaconPluginPlatform.instance.isBluetoothEnabled();
 }

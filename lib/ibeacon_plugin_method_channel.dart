@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:ibeacon_plugin/beacon_monitoring_state.dart';
+import 'package:ibeacon_plugin/ibeacon_plugin_exception.dart';
 import 'package:ibeacon_plugin/region.dart';
 
 import 'ibeacon_plugin_platform_interface.dart';
@@ -21,17 +22,23 @@ class MethodChannelIbeaconPlugin extends IbeaconPluginPlatform {
         'major': region.major,
         'minor': region.minor,
       },
-    );
+    ).catchError((e) {
+      (e as PlatformException).throwCustomException();
+    });
   }
 
   @override
   Future<void> startMonitoring() async {
-    await methodChannel.invokeMethod('startMonitoring');
+    return methodChannel.invokeMethod('startMonitoring').catchError((e) {
+      (e as PlatformException).throwCustomException();
+    });
   }
 
   @override
-  Future<void> stopMonitoring() async {
-    await methodChannel.invokeMethod('stopMonitoring');
+  Future<void> stopMonitoring() {
+    return methodChannel.invokeMethod('stopMonitoring').catchError((e) {
+      (e as PlatformException).throwCustomException();
+    });
   }
 
   @override
@@ -42,5 +49,16 @@ class MethodChannelIbeaconPlugin extends IbeaconPluginPlatform {
           ? BeaconMonitoringState.inside
           : BeaconMonitoringState.outside;
     });
+  }
+
+  @override
+  Future<bool> isBluetoothEnabled() async {
+    final isBluetoothEnabled = await methodChannel
+        .invokeMethod<bool>('isBluetoothEnabled')
+        .catchError((e) {
+      (e as PlatformException).throwCustomException();
+    });
+
+    return isBluetoothEnabled ?? false;
   }
 }

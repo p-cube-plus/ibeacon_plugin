@@ -17,6 +17,7 @@ class _BeaconTestState extends State<BeaconTest> {
   String startMonitoringText = "";
   String stopMonitoringText = "";
   String broadCastStreamText = "test";
+  String isBluetoothEnabledText = "";
   final ibeacon = IbeaconPlugin();
 
   late StreamSubscription<BeaconMonitoringState> becaonListener;
@@ -32,6 +33,19 @@ class _BeaconTestState extends State<BeaconTest> {
           broadCastStreamText = "outside";
         }
       });
+    });
+
+    Future.microtask(() async {
+      final isBluetoothEnabled = await ibeacon.isBluetoothEnabled;
+      if (!isBluetoothEnabled) {
+        setState(() {
+          isBluetoothEnabledText = "블루투스를 켜세요.";
+        });
+      } else {
+        setState(() {
+          isBluetoothEnabledText = "블루투스를 켰네요 :)";
+        });
+      }
     });
   }
 
@@ -68,8 +82,8 @@ class _BeaconTestState extends State<BeaconTest> {
                       .startMonitoring()
                       .then(
                           (value) => setState(() => startMonitoringText = "성공"))
-                      .catchError((error) =>
-                          setState(() => startMonitoringText = error)),
+                      .catchError((error) => setState(
+                          () => startMonitoringText = error.toString())),
                   child: const Text("startMonitoring")),
               Text(startMonitoringText),
               ElevatedButton(
@@ -82,6 +96,7 @@ class _BeaconTestState extends State<BeaconTest> {
                   child: const Text("stopMonitoring")),
               Text(stopMonitoringText),
               Text(broadCastStreamText),
+              Text(isBluetoothEnabledText),
             ],
           )),
     );
