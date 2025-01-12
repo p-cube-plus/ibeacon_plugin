@@ -41,7 +41,10 @@ public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, 
 
             let major = args["major"] as? NSNumber
             let minor = args["minor"] as? NSNumber
-            createRegion(identifier: identifier, uuid: uuid, major: major, minor: minor)
+            
+            if #available(iOS 13.0, *) {
+                createRegion(identifier: identifier, uuid: uuid, major: major, minor: minor)
+            }
             result(nil)
 
         case "startMonitoring":
@@ -90,7 +93,8 @@ public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, 
         print("\(Constants.logTag): 이벤트 채널 cancel")
         return nil
     }
-
+    
+    @available (iOS 13.0, *)
     private func createRegion(identifier: String, uuid: String, major: NSNumber?, minor: NSNumber?) {
         let beaconUUID = UUID(uuidString: uuid)!
         region = CLBeaconRegion(uuid: beaconUUID, major: major?.uint16Value ?? 0, minor: minor?.uint16Value ?? 0, identifier: identifier)
