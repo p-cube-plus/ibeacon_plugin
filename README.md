@@ -2,7 +2,7 @@
 ibeacon을 monitoring하기 위한 dart 플러그인
 
 - AOS: altbeacon 라이브러리 사용
-- iOS: CoreLocation 사용
+- iOS: CoreBluetooth 및 CoreLocation 사용
 
 
 #### 플러그인 비콘 동작에 대해
@@ -34,10 +34,8 @@ Runner\Info.plist
 ```
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>이 앱은 비콘 모니터링을 위해 위치 접근 권한이 필요합니다.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>이 앱은 비콘 모니터링을 위해 위치 접근 권한이 필요합니다.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>비콘 모니터링을 위해 항상 위치 정보를 사용합니다.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>이 앱은 비콘 모니터링을 위해 블루투스 사용 권한이 필요합니다.</string>
 ```
 
 ### 함수 종류
