@@ -1,5 +1,6 @@
 import UIKit
 import CoreLocation
+import CoreBluetooth
 import Flutter
 
 public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, FlutterStreamHandler {
