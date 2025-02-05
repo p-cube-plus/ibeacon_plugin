@@ -53,12 +53,26 @@ public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, 
                 return
             }
 
-            if CLLocationManager.authorizationStatus() != .authorizedAlways {
-                locationManager.requestAlwaysAuthorization()
+            let authStatus = CLLocationManager.authorizationStatus()
+            if authStatus == .notDetermined {
+                locationManager.requestWhenInUseAuthorization()
+                result(FlutterError(code: "PERMISSION_NOT_GRANTED", message: "위치 권한이 아직 부여되지 않았습니다. 권한 승인 후 다시 시도하세요.", details: nil))
+                return
+            }
+
+            if authStatus != .authorizedWhenInUse {
+                result(FlutterError(code: "PERMISSION_DENIED", message: "위치 권한이 필요합니다.", details: nil))
+                return
+            }
+
+            if CLLocationManager.authorizationStatus() != .authorizedWhenInUse {
+                locationManager.requestWhenInUseAuthorization()
             }
 
             print("\(Constants.logTag): 비콘 모니터링 시작 \(region.identifier)")
             locationManager.startMonitoring(for: region)
+            locationManager.requestState(for: region)
+
             result(nil)
 
         case "stopMonitoring":
@@ -73,8 +87,8 @@ public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, 
             result(nil)
 
         case "isBluetoothEnabled":
-            let isBluetoothEnabled = CLLocationManager.isMonitoringAvailable(for: CLBeaconRegion.self)
-            result(isBluetoothEnabled)
+            let centralManager = CBCentralManager(delegate: nil, queue: nil)
+            let isBluetoothEnabled = (centralManager.state == .poweredOn)
             print("\(Constants.logTag): 블루투스 활성화 상태: \(isBluetoothEnabled)")
 
         default:
@@ -109,13 +123,18 @@ public class IBeaconPlugin: NSObject, FlutterPlugin, CLLocationManagerDelegate, 
         }
     }
 
-    public func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
-        postEvent(true)
-        print("\(Constants.logTag): 비콘 INSIDE \(region.identifier)")
+    public func locationManager(_ manager: CLLocationManager, didStartMonitoringFor region: CLRegion) {
+        print("\(Constants.logTag): 비콘 모니터링 시작됨 \(region.identifier)")
+        manager.requestState(for: region)  // 현재 상태 요청
     }
 
-    public func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
-        postEvent(false)
-        print("\(Constants.logTag): 비콘 OUTSIDE \(region.identifier)")
+    public func locationManager(_ manager: CLLocationManager, didDetermineState state: CLRegionState, for region: CLRegion) {
+        if state == .inside {
+            print("\(Constants.logTag): 이미 비콘 영역 안에 있음 \(region.identifier)")
+            postEvent(true)
+        } else {
+            print("\(Constants.logTag): 비콘 영역 밖에 있음 \(region.identifier)")
+            postEvent(false)
+        }
     }
 }
